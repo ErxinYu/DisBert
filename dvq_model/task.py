@@ -48,12 +48,14 @@ def _get_words(task, words_by_freq_path: str):
         return
 
     for sentence in task.sentences:
-        update_vocab_freqs(sentesentence2tenorIndexnce)
+        update_vocab_freqs(sentence)
 
     words_by_freq = [(word, freq) for word, freq in word2freq.items()]
     words_by_freq.sort(key=lambda x: x[1], reverse=True)
 
     # for debugging
+    if not os.path.exists("/".join(words_by_freq_path.split("/")[:-1])):
+        os.makedirs("/".join(words_by_freq_path.split("/")[:-1]))
     with open(words_by_freq_path, "w") as f:
         f.write("total: " + "\t" + str(len(words_by_freq)) + "\n")
         for (word, freq) in words_by_freq:

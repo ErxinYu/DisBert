@@ -20,7 +20,6 @@ from huggingface_hub import Repository
 from transformers.optimization import AdamW,get_scheduler
 from transformers.data.data_collator import DataCollatorWithPadding,default_data_collator
 from transformers.trainer_utils import set_seed,SchedulerType
-sys.path.append("./transformers/models")
 from transformers.models.bert.tokenization_bert import BertTokenizer
 from transformers.models.bert.configuration_bert import BertConfig
 from transformers.models.bert.modeling_bert import BertForSequenceClassification
@@ -75,9 +74,8 @@ parser.add_argument(
 parser.add_argument(
     "--model_name_or_path",
     type=str,
-    default=bert-base-uncased,
+    default="bert-base-uncased",
     help="Path to pretrained model or model identifier from huggingface.co/models.",
-    required=True,
 )
 parser.add_argument(
     "--use_slow_tokenizer",
@@ -87,7 +85,7 @@ parser.add_argument(
 parser.add_argument(
     "--per_device_train_batch_size",
     type=int,
-    default=8,
+    default=32,
     help="Batch size (per device) for the training dataloader.",
 )
 parser.add_argument(
@@ -113,8 +111,8 @@ parser.add_argument(
 parser.add_argument("--num_warmup_steps", type=int, default=0, help="Number of steps for the warmup in the lr scheduler." )
 parser.add_argument("--seed", type=int, default=None, help="A seed for reproducible training.")
 parser.add_argument("--task_desc", type=str, help="task description.")
-parser.add_argument("--pretrain_vq", type=int, defalt=0, help="if pretrain_vq.")
-parser.add_argument("--pretrain_vq_model", type=str, help="pretrain_vq_model.")
+parser.add_argument("--pretrain_vq", type=int, default=0, help="if pretrain_vq.")
+parser.add_argument("--pretrain_vq_model", type=str, default=0, help="pretrain_vq_model.")
 parser.add_argument("--topic_num", type=int, help="")
 args = parser.parse_args()
 args.output_dir = args.home_dir + "ckpt/"
