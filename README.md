@@ -24,28 +24,28 @@ pip install gensim jieba matplotlib overrides pyhocon allennlp accelerate tensor
 2. Joint train topic model and VQ-VAE model
 
    ```
-   	 python run_double_sentences.py \
-           --model_name_or_path $bert-base-uncased \
-           --pretrain_vq 1\
-           --topic_num 30\
-           --task_name mrpc \
-           --home_dir /home/XXX/DisBert/
+   python run_double_sentences.py \
+      --model_name_or_path $bert-base-uncased \
+      --pretrain_vq 1\
+      --topic_num 30\
+      --task_name mrpc \
+      --home_dir /home/XXX/DisBert/
    ```
 
 3. Train and test DisBert
 
    ```
-   	 python run_double_sentences.py \
-           --model_name_or_path $bert-base-uncased \
-           --max_length 128 \
-           --per_device_train_batch_size 32\
-           --learning_rate 5e-5 \
-           --num_train_epochs 10\
-           --pretrain_vq 0\
-           --topic_num 30\
-           --pretrain_vq_model dis-cls_${topic}_epoch_9\
-           --task_name mrpc \
-           --home_dir /home/XXX/DisBert/
+   python run_double_sentences.py \
+     --model_name_or_path $bert-base-uncased \
+     --max_length 128 \
+     --per_device_train_batch_size 32\
+     --learning_rate 5e-5 \
+     --num_train_epochs 10\
+     --pretrain_vq 0\
+     --topic_num 30\
+     --pretrain_vq_model dis-cls_${topic}_epoch_9\
+     --task_name mrpc \
+     --home_dir /home/XXX/DisBert/
    ```
 
 ## Citation
