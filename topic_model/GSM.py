@@ -73,6 +73,8 @@ class GSM:
                 epochloss_lst.append(loss.item()/len(bows))
 
             if (epoch+1) % log_every==0:
+                if not os.path.exists('./ckpt/topic_ckpt/'):
+                    os.makedirs('./ckpt/topic_ckpt/')
                 save_name = f'./ckpt/topic_ckpt/{self.taskname}_{self.n_topic}.ckpt'
                 topic_embedding_save_name = f'./ckpt/topic_ckpt/{self.taskname}_topic_embedding.ckpt'
                 checkpoint = {
@@ -93,7 +95,6 @@ class GSM:
                 if best_ppx > text_ppx:
                     torch.save(checkpoint,save_name)
                     torch.save(self.vae.t.weight,topic_embedding_save_name)
-                    #print("This is best test ppx!")
                     best_ppx = text_ppx
                 print(f'taskname {self.taskname}, n_topic {self.n_topic} Epoch {(epoch+1):>3d}\tLoss:{sum(epochloss_lst)},train_ppx:{train_ppx},text_PPX:{text_ppx}\t')
     

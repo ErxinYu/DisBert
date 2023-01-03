@@ -7,10 +7,10 @@ The code for "Learning Semantic Textual Similarity via Topic-informed Discrete L
 ``` 
 conda create -n dis python=3.7 
 conda activate dis
-conda install pytorch torchvision torchaudio pytorch-cuda=11.6 -c pytorch -c nvidia
+conda install pytorch torchvision torchaudio cudatoolkit=11.6 -c pytorch -c nvidia
 cd transformers
 pip install -e .
-pip install gensim jieba matplotlib overrides pyhocon allennlp accelerate tensorboard
+pip install gensim jieba matplotlib overrides pyhocon allennlp accelerate tensorboard pandas datasets
 ```
 
 ## Usage
@@ -35,12 +35,9 @@ python run_double_sentences.py \
 
 ```
 python run_double_sentences.py \
-   --model_name_or_path $bert-base-uncased \
+   --model_name_or_path bert-base-uncased \
    --max_length 128 \
    --per_device_train_batch_size 32\
-   --learning_rate 5e-5 \
-   --num_train_epochs 10\
-   --pretrain_vq 0\
    --topic_num 30\
    --pretrain_vq_model dis-cls_${topic}_epoch_9\
    --task_name mrpc \

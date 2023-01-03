@@ -20,6 +20,7 @@ from huggingface_hub import Repository
 from transformers.optimization import AdamW,get_scheduler
 from transformers.data.data_collator import DataCollatorWithPadding,default_data_collator
 from transformers.trainer_utils import set_seed,SchedulerType
+sys.path.append("./transformers/models")
 from transformers.models.bert.tokenization_bert import BertTokenizer
 from transformers.models.bert.configuration_bert import BertConfig
 from transformers.models.bert.modeling_bert import BertForSequenceClassification
@@ -74,6 +75,7 @@ parser.add_argument(
 parser.add_argument(
     "--model_name_or_path",
     type=str,
+    default=bert-base-uncased,
     help="Path to pretrained model or model identifier from huggingface.co/models.",
     required=True,
 )
@@ -101,7 +103,7 @@ parser.add_argument(
     help="Initial learning rate (after the potential warmup period) to use.",
 )
 parser.add_argument("--weight_decay", type=float, default=0.0, help="Weight decay to use.")
-parser.add_argument("--num_train_epochs", type=int, default=3, help="Total number of training epochs to perform.")
+parser.add_argument("--num_train_epochs", type=int, default=10, help="Total number of training epochs to perform.")
 parser.add_argument(
     "--max_train_steps",
     type=int,
@@ -111,7 +113,7 @@ parser.add_argument(
 parser.add_argument("--num_warmup_steps", type=int, default=0, help="Number of steps for the warmup in the lr scheduler." )
 parser.add_argument("--seed", type=int, default=None, help="A seed for reproducible training.")
 parser.add_argument("--task_desc", type=str, help="task description.")
-parser.add_argument("--pretrain_vq", type=int, help="if pretrain_vq.")
+parser.add_argument("--pretrain_vq", type=int, defalt=0, help="if pretrain_vq.")
 parser.add_argument("--pretrain_vq_model", type=str, help="pretrain_vq_model.")
 parser.add_argument("--topic_num", type=int, help="")
 args = parser.parse_args()
@@ -171,18 +173,17 @@ def get_token_word_position_map(epoch, batch_bert_inputIds, bert_tokenizer, topi
         word_tokens_map = {}
         batch_bertWord2Token_position = []
         batch_topic_mask = []
-        batch_bert2dvq_position = [] #以bert的token为基准，去找其在dvq中的位置
+        batch_bert2dvq_position = [] 
         batch_bert_words = []
         batch_dvq_words_sen1 = []
         batch_dvq_words_sen2 = []
-        batch_dvq2topic_ids_sen1 = [] #以dvq的token为基准，去找其在topic_model中的位置
+        batch_dvq2topic_ids_sen1 = [] 
         batch_dvq2topic_ids_sen2 = []
         batch_bert_inputIds = batch_bert_inputIds.cpu().tolist()
         batch_dvq_inputIds_sen1 = batch_dvq_inputIds_sen1.cpu().tolist()
         batch_dvq_inputIds_sen2 = batch_dvq_inputIds_sen2.cpu().tolist()
 
         for i, bert_inputIds in enumerate(batch_bert_inputIds):
-            ###先从bertid 找token, 再合成word，再记录一下每个word(bert_words), 由哪些位置的token合成的(bertWord2Token_positions)
             bertWord2Token_positions = [] 
             tokens = []
             bert_words = []
@@ -195,17 +196,16 @@ def get_token_word_position_map(epoch, batch_bert_inputIds, bert_tokenizer, topi
                 else:
                     bertWord2Token_positions.append([j])
                     bert_words.append(token)
-            batch_bertWord2Token_position.append(bertWord2Token_positions) #[[0], [1, 2, 3, 4], [5], [6], [7], [8], [9, 10], [11], [12], [13], [14], [15], [16], [17], [18], [19], [20], [21], [22, 23], [24], [25], [26], [27], [28], [29], [30], [31], [32], [33], [34], [35], [36], [37], [38], [39], [40], [41], [42], [43], [44], [45], [46], [47], [48], [49], [50], [51], [52], [53], [54]]
+            batch_bertWord2Token_position.append(bertWord2Token_positions) 
             batch_bert_words.append(bert_words)  
             
             # for topic_model in dvq model
             topic_mask = []
             for j, word in enumerate(bert_words):
-                bertWord2Token_position= bertWord2Token_positions[j] #[1, 2, 3, 4]
+                bertWord2Token_position= bertWord2Token_positions[j]
                 if word in topicDataset.dictionary.token2id:
                     for k in bertWord2Token_position:
                         topic_mask.append(1)
-                        # 以下部分目前没啥用 word_tokens_map
                         if epoch == 0:
                             token_id = bert_inputIds[j]
                             token = bert_tokenizer.convert_ids_to_tokens(token_id)
@@ -219,7 +219,6 @@ def get_token_word_position_map(epoch, batch_bert_inputIds, bert_tokenizer, topi
             batch_topic_mask.append(topic_mask)    
 
 
-            # for discrete_model 计算一个indicate[] 每个元素表示 bert中的token在discrete model中的位置
             bert2dvq_position = {}
             dvq_ids_sen1 = batch_dvq_inputIds_sen1[i]
             dvq_words_sen1 = []
@@ -243,19 +242,11 @@ def get_token_word_position_map(epoch, batch_bert_inputIds, bert_tokenizer, topi
                 else:
                     for k in bertWord2Token_position:
                         bert2dvq_position[k] = 0
-            # print("#############")
-            # print("bert_words",bert_words)
-            # print("dvq_words_sen1",dvq_words_sen1)    
-            # print("dvq_words_sen2",dvq_words_sen2)   
-            # print("bertWord2Token_position", bertWord2Token_positions)
-            # print("bert2dvq_position", bert2dvq_position)   
                  
             batch_bert2dvq_position.append(bert2dvq_position)
             batch_dvq_words_sen1.append(dvq_words_sen1)
             batch_dvq_words_sen2.append(dvq_words_sen2)
 
-            ##判断dvq_words 中每个词在topic_model中的编号
-            # print("topicDataset.dictionary.token2id:",len(topicDataset.dictionary.token2id))
             dvq2topic_ids_sen1 = []
             for word in dvq_words_sen1:
                 if word in topicDataset.dictionary.token2id:
@@ -296,7 +287,6 @@ def main():
         label_list.sort()  # Let's sort it for determinism
         num_labels =  len(label_list)
 
-    #load model
     if "roberta" not in args.model_name_or_path:
         config = BertConfig.from_pretrained(args.model_name_or_path)	
         tokenizer = BertTokenizer.from_pretrained(args.model_name_or_path)
@@ -309,16 +299,15 @@ def main():
 
 
 
-    #label2id
     if args.task_name != "stsb":
         label_to_id = {v: i for i, v in enumerate(label_list)}
         model.config.label2id = {l: i for i, l in enumerate(label_list)}
         model.config.id2label = {id: label for label, id in config.label2id.items()}
     else:
         label_to_id = None
-    padding = "max_length" if args.pad_to_max_length else False   #padding=false
+    padding = "max_length" if args.pad_to_max_length else False   
 
-    # Precess Dataset
+
     tDataset = topicDataset(raw_datasets["test"], args.task_name, args.data_dir)
     gsm, gsm_optimizer = load_topicModel(voc_size=tDataset.vocabsize)
     def preprocess_function(examples): 
@@ -345,14 +334,14 @@ def main():
     processed_datasets = raw_datasets.map(
         preprocess_function,
         batched=False,
-        remove_columns=raw_datasets["test"].column_names, #'label', 'title', 'sentence'
+        remove_columns=raw_datasets["test"].column_names, 
         desc="Running tokenizer on dataset",
     )
     train_dataset = processed_datasets["train"]
     eval_dataset = processed_datasets["validation"]
     test_dataset = processed_datasets["test"]
 
-    # DataLoaders creation:
+
     if args.pad_to_max_length:
         data_collator = default_data_collator
     else:
@@ -361,8 +350,7 @@ def main():
     eval_dataloader = DataLoader(eval_dataset, collate_fn=data_collator, shuffle=False, num_workers=4,batch_size=args.per_device_eval_batch_size)
     test_dataloader = DataLoader(test_dataset, collate_fn=data_collator, shuffle=False,num_workers=4, batch_size=args.per_device_eval_batch_size)
 
-    # Optimizer
-    # Split weights in two groups, one with weight decay and the other not.
+
     no_decay = ["bias", "LayerNorm.weight"]
     optimizer_grouped_parameters = [
         {
@@ -376,12 +364,12 @@ def main():
     ]
     optimizer = AdamW(optimizer_grouped_parameters, lr=args.learning_rate)
 
-    # Prepare everything with our `accelerator`.
+
     model, optimizer, train_dataloader, eval_dataloader, test_dataloader, gsm, gsm_optimizer, vae, vae_optimizer = accelerator.prepare(
         model, optimizer, train_dataloader, eval_dataloader, test_dataloader, gsm, gsm_optimizer, vae, vae_optimizer
     )
 
-    # Scheduler and math around the number of training steps.
+
     num_update_steps_per_epoch = len(train_dataloader)
     if args.max_train_steps is None:
         args.max_train_steps = args.num_train_epochs * num_update_steps_per_epoch
@@ -394,11 +382,11 @@ def main():
         num_warmup_steps=args.num_warmup_steps,
         num_training_steps=args.max_train_steps,
     )
-    # Get the metric function
+
     if args.task_name =="stsb":
         metric = load_metric("glue", "stsb")
     else:
-        metric = load_metric("glue", "mrpc") #"f1,acc"
+        metric = load_metric("glue", "mrpc") 
 
 
     # Train
@@ -427,7 +415,7 @@ def main():
     def _one_step_topic_model(topic_batch_sen):
         p_x,mus,log_vars,theta,beta,topic_embedding = gsm(topic_batch_sen)
         logsoftmax = torch.log_softmax(p_x + 1e-10, dim=1) 
-        rec_loss = -1.0 * torch.sum(topic_batch_sen*logsoftmax) #bows*logsoftmax = [batch_size, |V|], 其中torch.sum 把所有的loss全部加起来了，也可以只用加某一维度。               
+        rec_loss = -1.0 * torch.sum(topic_batch_sen*logsoftmax)            
         kl_div = -0.5 * torch.sum(1+log_vars-mus.pow(2)-log_vars.exp())
         loss_topic = rec_loss + kl_div
         return loss_topic, theta, beta, topic_embedding
