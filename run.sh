@@ -1,0 +1,1 @@
+python3 topic_model/GSM_run.py --taskname mrpc --n_topic 30 --num_epochs 500
