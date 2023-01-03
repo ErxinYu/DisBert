@@ -5,7 +5,7 @@ The code for "Learning Semantic Textual Similarity via Topic-informed Discrete L
 ## Requirements
 
 ``` 
-conda create-n dis python=3.7 
+conda create -n dis python=3.7 
 conda activate dis
 conda install pytorch torchvision torchaudio pytorch-cuda=11.6 -c pytorch -c nvidia
 cd transformers
