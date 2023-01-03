@@ -15,24 +15,23 @@ pip install gensim jieba matplotlib overrides pyhocon allennlp accelerate tensor
 
 ## Usage
 
-### Train topic model 
+### Train topic model, take mrpc task as an example:
 
 ``` 
 python3 topic_model/GSM_run.py --taskname mrpc --n_topic 30 --num_epochs 500
 ```
 
-### Joint train topic model and VQ-VAE model
+### Joint train topic model and VQ-VAE model:
 
 ```
 python run_double_sentences.py \
-   --model_name_or_path $bert-base-uncased \
    --pretrain_vq 1\
    --topic_num 30\
    --task_name mrpc \
    --home_dir /home/XXX/DisBert/
 ```
 
-### Train and test DisBert
+### Train and test DisBert:
 
 ```
 python run_double_sentences.py \
