@@ -5,8 +5,12 @@ The code for "Learning Semantic Textual Similarity via Topic-informed Discrete L
 ## Requirements
 
 ``` 
-python=3.7
-pytorch-cuda=11.6
+conda create-n dis python=3.7 
+conda activate dis
+conda install pytorch torchvision torchaudio pytorch-cuda=11.6 -c pytorch -c nvidia
+cd transformers
+pip install -e .
+pip install gensim jieba matplotlib overrides pyhocon allennlp accelerate tensorboard
 ```
 
 ## Usage
@@ -55,6 +59,4 @@ pytorch-cuda=11.6
   year={2022}
 }
 ```
-
-
 
