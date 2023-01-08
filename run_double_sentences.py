@@ -114,6 +114,7 @@ parser.add_argument("--task_desc", type=str, help="task description.")
 parser.add_argument("--pretrain_vq", type=int, default=0, help="if pretrain_vq.")
 parser.add_argument("--pretrain_vq_model", type=str, default=0, help="pretrain_vq_model.")
 parser.add_argument("--topic_num", type=int, help="")
+parser.add_argument("--load_bert_model", type=bool, default=False, help="")
 args = parser.parse_args()
 args.output_dir = args.home_dir + "ckpt/"
 args.data_dir = args.home_dir + "data/" + args.task_name + "/"
@@ -455,6 +456,10 @@ def main():
         gsm.train()
         vae.train()
         for step, batch in enumerate(train_dataloader):
+            if args.load_bert_model:
+                break
+            print("1111")
+            exit()
             batch_bertWord2Token_position, batch_bert2dvq_position , batch_dvq2topic_ids_sen1, batch_dvq2topic_ids_sen2, batch_dvq_words_sen1, batch_dvq_words_sen2, batch_bert_words= \
                 get_token_word_position_map(epoch, batch["input_ids"], tokenizer, tDataset, batch["vae1"], batch["vae2"], vae_vocab)
             #topic_model    
@@ -523,15 +528,15 @@ def main():
             #bert
             if not args.pretrain_vq:
                 eval_metric = metric.compute()
-                if dataloader == test_dataloader:
-                    print(f"test epoch {epoch}: {eval_metric}")
+                if dataloader == eval_dataloader:
+                    print(f"eval epoch {epoch}: {eval_metric}")
                 else:
                     if float(eval_metric["f1"]) > best_result: 
-                        print("++++++This is best result++++++") 
                         best_result = float(eval_metric["f1"])
                         best_model = model
-                    print(f"eval epoch {epoch}: {eval_metric}")
-                    
+                    print(f"test epoch {epoch}: {eval_metric}")
+                    # if args.load_bert_model:
+                    #     exit() 
 
 
             # save_model

@@ -11,11 +11,17 @@
 #    --home_dir /home/pc/Desktop/DisBert/
 
 #Train and test DisBert:
-python run_double_sentences.py \
-   --model_name_or_path bert-base-uncased \
-   --max_length 128 \
-   --per_device_train_batch_size 32\
-   --topic_num 30\
-   --pretrain_vq_model mrpc_30_epoch_9\
-   --task_name mrpc \
-   --home_dir /home/pc/Desktop/DisBert/
+# for i in 1 2 3 4 5 6 7 8 9 10
+# do
+   export CUDA_VISIBLE_DEVICES=7
+   python run_double_sentences.py \
+      --load_bert_model True \
+      --model_name_or_path /home/yex/temp2/DisBert/ckpt/mrpc_bert_0.8895348837209301 \
+      --max_length 128 \
+      --per_device_train_batch_size 32\
+      --topic_num 30\
+      --pretrain_vq_model mrpc_30\
+      --task_name mrpc \
+      --home_dir /home/yex/temp2/DisBert/
+
+# done
