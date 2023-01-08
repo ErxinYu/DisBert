@@ -456,10 +456,7 @@ def main():
         gsm.train()
         vae.train()
         for step, batch in enumerate(train_dataloader):
-            if args.load_bert_model:
-                break
-            print("1111")
-            exit()
+
             batch_bertWord2Token_position, batch_bert2dvq_position , batch_dvq2topic_ids_sen1, batch_dvq2topic_ids_sen2, batch_dvq_words_sen1, batch_dvq_words_sen2, batch_bert_words= \
                 get_token_word_position_map(epoch, batch["input_ids"], tokenizer, tDataset, batch["vae1"], batch["vae2"], vae_vocab)
             #topic_model    
@@ -535,8 +532,6 @@ def main():
                         best_result = float(eval_metric["f1"])
                         best_model = model
                     print(f"test epoch {epoch}: {eval_metric}")
-                    # if args.load_bert_model:
-                    #     exit() 
 
 
             # save_model
