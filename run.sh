@@ -20,4 +20,4 @@ python run_double_sentences.py \
    --topic_num 30\
    --pretrain_vq_model mrpc_30\
    --task_name mrpc \
-   --home_dir /home/yex/temp2/DisBert/
+   --home_dir /home/xxx/temp2/DisBert/

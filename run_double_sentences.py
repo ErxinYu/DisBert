@@ -449,8 +449,6 @@ def main():
             batch.pop("bow2")
             batch.pop("bow1")
             return batch
-    best_result = 0
-    best_model = 0   
     for epoch in range(args.num_train_epochs):
         model.train()
         gsm.train()
@@ -528,9 +526,6 @@ def main():
                 if dataloader == eval_dataloader:
                     print(f"eval epoch {epoch}: {eval_metric}")
                 else:
-                    if float(eval_metric["f1"]) > best_result: 
-                        best_result = float(eval_metric["f1"])
-                        best_model = model
                     print(f"test epoch {epoch}: {eval_metric}")
 
 
